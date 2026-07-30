@@ -71,37 +71,51 @@ export default function ProfileForm({
   const handleSecondary = () => { if (validateSecondary()) onSecondarySearch() }
 
   return (
-    <div className="card p-6 space-y-6 animate-fade-in">
+    <div className="rounded-[28px] border border-white/10 bg-[#0d1320]/95 shadow-[0_24px_80px_rgba(0,0,0,0.28)] overflow-hidden animate-fade-in">
       {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-white">Your Profile</h2>
-        <p className="text-sm text-muted mt-0.5">Tell us about yourself to find matching jobs</p>
+      <div className="p-5 sm:p-6 border-b border-white/10 bg-white/[0.025]">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="section-heading mb-2">Search Console</p>
+            <h2 className="text-xl font-bold tracking-tight text-white">Candidate profile</h2>
+            <p className="text-sm text-muted mt-2 leading-relaxed">Inputs used by job search, email, and resume analysis.</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-accent/20 border border-accent/25 flex items-center justify-center text-accent font-bold">
+            {profile.skills.length}
+          </div>
+        </div>
       </div>
+
+      <div className="p-5 sm:p-6 space-y-6">
 
       {/* Errors */}
       {errors.length > 0 && (
-        <div className="flex items-start gap-2 bg-red/10 border border-red/20 rounded-xl p-3">
+        <div className="flex items-start gap-3 bg-red/10 border border-red/30 rounded-2xl p-4">
           <AlertCircle className="w-4 h-4 text-red shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            {errors.map((e, i) => <p key={i} className="text-xs text-red">{e}</p>)}
+          <div className="space-y-1">
+            {errors.map((e, i) => <p key={i} className="text-xs text-red font-medium">{e}</p>)}
           </div>
         </div>
       )}
 
       {/* Target Role */}
-      <div className="space-y-1.5">
-        <label className="section-heading">Target Role</label>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="w-7 h-7 rounded-full bg-white text-ink text-xs font-bold flex items-center justify-center">1</span>
+          <div>
+            <p className="text-sm font-bold text-white">Role target</p>
+            <p className="text-xs text-muted">Set the search intent and seniority.</p>
+          </div>
+        </div>
         <input
           className="input"
           placeholder="e.g. Frontend Developer"
           value={profile.targetRole}
           onChange={e => update({ targetRole: e.target.value })}
         />
-      </div>
 
       {/* Experience */}
-      <div className="space-y-1.5">
-        <label className="section-heading">Experience Level</label>
+      <div>
         <select
           className="select"
           value={profile.experience}
@@ -112,18 +126,25 @@ export default function ProfileForm({
           ))}
         </select>
       </div>
+      </div>
 
       {/* Skills */}
-      <div className="space-y-2">
-        <label className="section-heading">Skills</label>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="w-7 h-7 rounded-full bg-white text-ink text-xs font-bold flex items-center justify-center">2</span>
+          <div>
+            <p className="text-sm font-bold text-white">Skill signal</p>
+            <p className="text-xs text-muted">Add stack keywords for broader matching.</p>
+          </div>
+        </div>
         {/* Tags */}
         {profile.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {profile.skills.map(s => (
-              <span key={s} className="inline-flex items-center gap-1 bg-accent/10 border border-accent/20 text-accent text-xs px-2.5 py-1 rounded-lg">
+              <span key={s} className="inline-flex items-center gap-2 bg-accent/10 border border-accent/25 text-accent text-xs px-3 py-1.5 rounded-full font-semibold hover:bg-accent/20 transition-colors">
                 {s}
                 <button onClick={() => removeSkill(s)} className="hover:text-white transition-colors">
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
@@ -140,7 +161,7 @@ export default function ProfileForm({
           />
           <button
             onClick={() => addSkill(skillInput)}
-            className="btn-ghost px-3"
+            className="btn-ghost px-3.5"
             title="Add skill"
           >
             <Plus className="w-4 h-4" />
@@ -152,8 +173,8 @@ export default function ProfileForm({
             <button
               key={s}
               onClick={() => addSkill(s)}
-              className="text-xs px-2 py-0.5 rounded-md bg-slate border border-border text-muted
-                         hover:border-accent/40 hover:text-dim transition-colors"
+              className="text-xs px-3 py-1.5 rounded-full bg-white/[0.035] border border-white/10 text-muted
+                         hover:border-accent/40 hover:text-accent hover:bg-accent/10 transition-all font-semibold"
             >
               + {s}
             </button>
@@ -162,41 +183,50 @@ export default function ProfileForm({
       </div>
 
       {/* Resume Upload */}
-      <div className="space-y-2">
-        <label className="section-heading">Resume (Optional)</label>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="w-7 h-7 rounded-full bg-white text-ink text-xs font-bold flex items-center justify-center">3</span>
+          <div>
+            <p className="text-sm font-bold text-white">Resume context</p>
+            <p className="text-xs text-muted">Optional, but improves tailoring.</p>
+          </div>
+        </div>
         <div
           onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors
+          className={`border border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all
             ${profile.resumeFile
-              ? 'border-green/40 bg-green/5'
-              : 'border-border hover:border-accent/40 hover:bg-accent/5'
+              ? 'border-green/40 bg-green/10 hover:bg-green/20'
+              : 'border-white/20 bg-white/[0.025] hover:border-accent/40 hover:bg-accent/10'
             }`}
         >
           {isParsing ? (
-            <div className="flex items-center justify-center gap-2 text-dim text-sm">
+            <div className="flex items-center justify-center gap-2 text-dim text-sm font-semibold">
               <span className="spinner" /> Parsing resume…
             </div>
           ) : profile.resumeFile ? (
-            <div className="flex items-center justify-center gap-2 text-green text-sm">
+            <div className="flex items-center justify-center gap-2 text-green text-sm font-semibold">
               <FileText className="w-4 h-4" />
-              <span className="font-medium">{profile.resumeFile.name}</span>
-              <span className="text-muted">({formatFileSize(profile.resumeFile.size)})</span>
+              <span>{profile.resumeFile.name}</span>
+              <span className="text-muted text-xs">({formatFileSize(profile.resumeFile.size)})</span>
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-2 text-muted text-sm">
-              <Upload className="w-4 h-4" />
-              <span>Upload PDF, DOCX, JPG or PNG</span>
+            <div className="flex flex-col items-center justify-center gap-2 text-muted text-sm">
+              <div className="w-11 h-11 rounded-2xl bg-white/[0.045] border border-white/10 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-accent" />
+              </div>
+              <span className="font-semibold text-dim">Upload PDF, DOCX, JPG or PNG</span>
+              <span className="text-xs text-muted">Used for resume-aware email and analysis</span>
             </div>
           )}
         </div>
         {fileError && (
-          <p className="text-xs text-red flex items-center gap-1">
+          <p className="text-xs text-red flex items-center gap-1 font-medium">
             <AlertCircle className="w-3 h-3" /> {fileError}
           </p>
         )}
         {profile.resumeText && !isParsing && (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-green flex items-center gap-1">
+            <p className="text-xs text-green flex items-center gap-1 font-semibold">
               ✓ Resume parsed ({profile.resumeText.length.toLocaleString()} chars)
             </p>
             <button
@@ -207,7 +237,7 @@ export default function ProfileForm({
               className="text-xs text-muted hover:text-red transition-colors"
               title="Remove resume"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
@@ -221,26 +251,27 @@ export default function ProfileForm({
       </div>
 
       {/* CTA Buttons */}
-      <div className="space-y-2 pt-1">
+      <div className="space-y-3 pt-1">
         <button
           onClick={handlePrimary}
           disabled={isSearching}
-          className="btn-primary w-full justify-center py-3"
+          className="btn-primary w-full justify-center py-3.5 font-bold"
         >
           {isSearching ? <><span className="spinner" /> Searching…</> : <><Search className="w-4 h-4" /> Find Jobs by Role</>}
         </button>
         <button
           onClick={handleSecondary}
           disabled={isSearching}
-          className="btn-ghost w-full justify-center py-3"
+          className="btn-ghost w-full justify-center py-3.5 font-semibold"
         >
           {isSearching ? <><span className="spinner" /> Searching…</> : <><Zap className="w-4 h-4" /> Find Jobs by Skills</>}
         </button>
       </div>
 
-      <p className="text-xs text-muted text-center">
+      <p className="text-xs text-muted text-center leading-relaxed rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-3">
         Role search filters by title + experience · Skills search finds any skill match
       </p>
+      </div>
     </div>
   )
 }

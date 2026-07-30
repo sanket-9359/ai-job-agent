@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const jobRoutes = require('./routes/jobs');
 const aiRoutes = require('./routes/ai');
 const applicationRoutes = require('./routes/applications');
+const authRoutes = require('./routes/auth');
 const { errorHandler } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
@@ -31,6 +32,7 @@ app.use((req, _res, next) => {
 });
 
 // ─── Routes ─────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/applications', applicationRoutes);

@@ -46,19 +46,20 @@ exports.createApplication = async (req, res) => {
     }
 
     // Check if user already saved this job
-    const existing = await Application.findOne({ job: job._id });
+    const existing = await Application.findOne({ job: job._id, user: req.user._id });
     if (existing) {
       return res.status(409).json({ success: false, message: 'Job already saved.' });
     }
 
     // Create the application record
     const application = await Application.create({ 
+      user: req.user._id,
       job: job._id,
       status: 'pending',
       savedAt: new Date()
     });
     
-    logger.info(`Application created for job: ${job.title}`);
+    logger.info(`Application created for job: ${job.title} by user ${req.user.email}`);
 
     // Return the formatted application
     const savedApp = await Application.findById(application._id).populate('job');
@@ -71,9 +72,9 @@ exports.createApplication = async (req, res) => {
 };
 
 // ─── Get All Applications ────────────────────────────────────────────────────
-exports.getApplications = async (_req, res) => {
+exports.getApplications = async (req, res) => {
   try {
-    const apps = await Application.find()
+    const apps = await Application.find({ user: req.user._id })
       .populate('job')
       .sort({ savedAt: -1 })
       .lean();
@@ -96,7 +97,7 @@ exports.getApplications = async (_req, res) => {
 // ─── Get Application by ID ────────────────────────────────────────────────────
 exports.getApplicationById = async (req, res) => {
   try {
-    const app = await Application.findById(req.params.id).populate('job').lean();
+    const app = await Application.findOne({ _id: req.params.id, user: req.user._id }).populate('job').lean();
     if (!app) return res.status(404).json({ success: false, message: 'Application not found.' });
 
     return res.json({
@@ -117,7 +118,7 @@ exports.getApplicationById = async (req, res) => {
 exports.updateApplication = async (req, res) => {
   try {
     const { status, notes } = req.body;
-    const app = await Application.findById(req.params.id);
+    const app = await Application.findOne({ _id: req.params.id, user: req.user._id });
     if (!app) return res.status(404).json({ success: false, message: 'Application not found.' });
 
     if (status) {
@@ -136,20 +137,31 @@ exports.updateApplication = async (req, res) => {
     app.updatedAt = new Date();
     await app.save();
 
-    logger.info(`Application ${app._id} updated to status: ${app.status}`);
-    return res.json({ success: true, data: formatApplication(app) });
-  } catch (err) {
-    logger.error('updateApplication error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to update application.' });
-  }
-};
+    const updatedApp = await Application
+      .findById(app._id)
+      .populate('job');
+
+    logger.info(
+      `Application ${app._id} updated to status: ${app.status}`
+    );
+
+
+    return res.json({
+      success: true,
+      data: formatApplication(updatedApp)
+    });
+      } catch (err) {
+        logger.error('updateApplication error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to update application.' });
+      }
+    };
 
 // ─── Delete Application ───────────────────────────────────────────────────────
 exports.deleteApplication = async (req, res) => {
   try {
-    const app = await Application.findByIdAndDelete(req.params.id);
+    const app = await Application.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!app) return res.status(404).json({ success: false, message: 'Application not found.' });
-    logger.info(`Application ${req.params.id} deleted`);
+    logger.info(`Application ${req.params.id} deleted by user ${req.user.email}`);
     return res.json({ success: true, message: 'Application deleted.' });
   } catch (err) {
     logger.error('deleteApplication error:', err);

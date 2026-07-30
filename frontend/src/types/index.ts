@@ -7,6 +7,17 @@ export interface UserProfile {
   resumeFile:  File | null;
 }
 
+export interface AuthUser {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}
+
 // ─── Job ──────────────────────────────────────────────────────────────────────
 export interface MatchMetadata {
   roleMatch:           boolean;
@@ -82,6 +93,13 @@ export interface BulletsResponse {
   weakPoints:   string[];
   suggestions:  string[];
   _fallback:    boolean;
+}
+
+export interface ResumeAnalysisResponse {
+  strengths:       string[];
+  weaknesses:      string[];
+  match_percentage: number;
+  _fallback:       boolean;
 }
 
 // ─── Search mode ──────────────────────────────────────────────────────────────

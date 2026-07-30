@@ -61,62 +61,65 @@ export default function DashboardPage({ refreshTrigger }: Props) {
   ]
 
   if (loading) return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 animate-fade-in">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 animate-fade-in">
       {[1,2,3,4,5].map(i => (
-        <div key={i} className="card p-4 space-y-2">
-          <div className="h-3 bg-slate rounded w-2/3 animate-pulse-soft" />
-          <div className="h-7 bg-slate rounded w-1/2 animate-pulse-soft" />
+        <div key={i} className="card p-6 space-y-4">
+          <div className="h-3 bg-white/10 rounded-xl w-2/3 animate-pulse-soft" />
+          <div className="h-8 bg-white/10 rounded-xl w-1/2 animate-pulse-soft" />
         </div>
       ))}
     </div>
   )
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-white">Dashboard</h1>
-          <p className="text-sm text-muted mt-0.5">Your job search at a glance</p>
+    <div className="max-w-[1320px] mx-auto space-y-6 animate-fade-in">
+      <div className="rounded-[32px] border border-white/10 bg-white/[0.035] p-6 sm:p-8 shadow-[0_24px_90px_rgba(0,0,0,0.24)]">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+          <div>
+            <p className="section-heading mb-3">Pipeline Intelligence</p>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white">Dashboard</h1>
+            <p className="text-base text-dim mt-3">Your job search at a glance</p>
+          </div>
+          <button onClick={load} className="btn-ghost w-full sm:w-auto justify-center">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
         </div>
-        <button onClick={load} className="btn-ghost">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </button>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map(({ label, value, color, bg }) => (
-          <div key={label} className={`card p-4 border ${bg}`}>
-            <p className="text-xs text-muted mb-1">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+          <div key={label} className={`rounded-[24px] border ${bg} p-5 sm:p-6 shadow-[0_18px_54px_rgba(0,0,0,0.22)] hover:-translate-y-0.5 hover:border-white/20 transition-all`}>
+            <p className="section-heading mb-3">{label}</p>
+            <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${color}`}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Pipeline */}
       {total > 0 && (
-        <div className="card p-5 space-y-4">
+        <div className="rounded-[28px] border border-white/10 bg-[#0d1320]/85 p-6 sm:p-7 space-y-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
           <p className="section-heading flex items-center gap-2">
-            <TrendingUp className="w-3.5 h-3.5" /> Application Pipeline
+            <TrendingUp className="w-4 h-4" /> Application Pipeline
           </p>
-          <div className="space-y-3">
+          <div className="grid gap-4">
             {(['pending','applied','interview','rejected','offer'] as ApplicationStatus[]).map(status => {
               const Icon  = STATUS_ICONS[status]
               const count = counts[status] || 0
               const pct   = total > 0 ? Math.round(count / total * 100) : 0
               return (
-                <div key={status} className="flex items-center gap-3">
-                  <div className={`flex items-center gap-1.5 w-28 shrink-0 badge border ${STATUS_COLORS[status]}`}>
-                    <Icon className="w-3 h-3" />
-                    <span className="capitalize text-xs">{status}</span>
+                <div key={status} className="grid grid-cols-[130px_minmax(0,1fr)_64px] items-center gap-4">
+                  <div className={`flex items-center gap-1.5 shrink-0 badge border ${STATUS_COLORS[status]}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="capitalize text-xs font-semibold">{status}</span>
                   </div>
-                  <div className="flex-1 bg-slate rounded-full h-2 overflow-hidden">
+                  <div className="bg-white/10 rounded-full h-3 overflow-hidden shadow-inner shadow-black/30">
                     <div
                       className="h-full rounded-full bg-current transition-all duration-700"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted w-8 text-right">{count}</span>
+                  <span className="text-xs text-muted font-semibold w-16 text-right">{count} ({pct}%)</span>
                 </div>
               )
             })}
@@ -126,20 +129,20 @@ export default function DashboardPage({ refreshTrigger }: Props) {
 
       {/* Recent activity */}
       {recent.length > 0 && (
-        <div className="card p-5 space-y-4">
+        <div className="rounded-[28px] border border-white/10 bg-[#0d1320]/85 p-6 sm:p-7 space-y-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
           <p className="section-heading flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5" /> Recent Activity
+            <Calendar className="w-4 h-4" /> Recent Activity
           </p>
           <div className="space-y-2">
             {recent.map(app => (
-              <div key={app._id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{app.job?.title}</p>
-                  <p className="text-xs text-muted">{app.job?.company}</p>
+              <div key={app._id} className={`grid sm:grid-cols-[minmax(0,1fr)_auto] gap-3 py-4 px-4 rounded-2xl transition-colors bg-white/[0.025] hover:bg-white/[0.055] border border-white/10`}>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-bold text-white truncate">{app.job?.title}</p>
+                  <p className="text-sm text-muted mt-1">{app.job?.company}</p>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-4 shrink-0">
                   <span className={`badge border ${STATUS_COLORS[app.status]}`}>{app.status}</span>
-                  <span className="text-xs text-muted">{formatDate(app.savedAt)}</span>
+                  <span className="text-xs text-muted font-medium">{formatDate(app.savedAt)}</span>
                 </div>
               </div>
             ))}
@@ -148,13 +151,13 @@ export default function DashboardPage({ refreshTrigger }: Props) {
       )}
 
       {total === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate border border-border flex items-center justify-center">
-            <TrendingUp className="w-7 h-7 text-muted" />
+        <div className="card flex flex-col items-center justify-center py-28 gap-5 animate-fade-in">
+          <div className="w-20 h-20 rounded-3xl bg-white/[0.045] border border-white/10 flex items-center justify-center">
+            <TrendingUp className="w-8 h-8 text-accent" />
           </div>
           <div className="text-center">
-            <p className="text-white font-medium">No data yet</p>
-            <p className="text-sm text-muted mt-1">Start saving jobs to see your pipeline here.</p>
+            <p className="text-white font-bold text-xl">No data yet</p>
+            <p className="text-sm text-muted mt-3 max-w-xs leading-relaxed">Start saving jobs to see your application pipeline and dashboard metrics here.</p>
           </div>
         </div>
       )}

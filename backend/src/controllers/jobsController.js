@@ -1,10 +1,9 @@
 const Job = require('../models/Job');
 const { fetchJobsFromJSearch } = require('../utils/jsearch');
-const DEMO_JOBS = require('../utils/demoJobs');
+// REMOVED: const DEMO_JOBS = require('../utils/demoJobs');
 const { buildMatchMetadata } = require('../utils/matchHelper');
 const logger = require('../utils/logger');
 const multer = require('multer');
-const path = require('path');
 
 // ─── Multer Setup ────────────────────────────────────────────────────────────
 const upload = multer({
@@ -70,7 +69,23 @@ exports.searchJobs = async (req, res) => {
     }
 
     const profile = { targetRole, experience, skills, resumeText };
-    const query = mode === 'primary' ? targetRole : skills.join(' ');
+
+    // Build search query with experience level
+    let baseQuery = mode === 'primary' ? targetRole : skills.join(' ');
+
+    let experienceModifier = '';
+    if (experience) {
+      const expNum = parseInt(experience) || 0;
+      if (expNum === 0) {
+        experienceModifier = ' intern OR "entry level" OR junior OR fresher OR graduate';
+      } else if (expNum >= 1 && expNum <= 2) {
+        experienceModifier = ' junior OR "1-2 years" OR "entry level"';
+      } else if (expNum >= 3 && expNum <= 5) {
+        experienceModifier = ' OR "3-5 years" OR "mid level"';
+      }
+    }
+
+    const query = baseQuery + experienceModifier;
 
     // ── 1. Try JSearch API ──
     let rawJobs = [];
@@ -86,14 +101,16 @@ exports.searchJobs = async (req, res) => {
     if (rawJobs.length === 0) {
       logger.info('Falling back to cache...');
       rawJobs = await getCachedJobs(query);
-      source = rawJobs.length > 0 ? 'cache' : 'demo';
+      source = rawJobs.length > 0 ? 'cache' : 'none';
     }
 
-    // ── 3. Fall back to demo ──
+    // ── 3. NO DEMO FALLBACK ──
+    // If no jobs found, return empty results immediately
     if (rawJobs.length === 0) {
-      logger.info('Falling back to demo jobs');
-      rawJobs = DEMO_JOBS;
-      source = 'demo';
+      return res.json({
+        success: true,
+        data: { jobs: [], total: 0, source: 'none' },
+      });
     }
 
     // ── Filter ──
@@ -104,10 +121,19 @@ exports.searchJobs = async (req, res) => {
         return meta.roleMatch && meta.experienceMatch;
       });
     } else {
-      // secondary: need ≥1 matched skill
       filtered = rawJobs.filter(job => {
         const meta = buildMatchMetadata(job, profile);
         return meta.matchedSkills.length > 0;
+      });
+    }
+
+    // Additional filtering for freshers: exclude senior roles
+    const userExp = parseInt(experience) || 0;
+    if (userExp === 0) {
+      filtered = filtered.filter(job => {
+        const jobText = (job.title + ' ' + (job.description || '')).toLowerCase();
+        const seniorKeywords = ['senior', 'lead', 'principal', 'manager', 'director', 'architect', 'expert', 'staff'];
+        return !seniorKeywords.some(keyword => jobText.includes(keyword));
       });
     }
 
@@ -152,7 +178,6 @@ exports.getJobById = async (req, res) => {
 
 /**
  * POST /api/jobs/generate-summary
- * Parses uploaded resume file to text.
  */
 exports.generateSummary = async (req, res) => {
   try {
@@ -181,16 +206,14 @@ exports.generateSummary = async (req, res) => {
 
     text = text.trim();
     if (text.length < 50) {
-      return res.status(400).json({ success: false, message: 'Resume appears unreadable or too short. Please upload a clearer file.' });
+      return res.status(400).json({ success: false, message: 'Resume appears unreadable or too short.' });
     }
 
-    // Cap at 20,000 chars
     const summary = text.slice(0, 20000);
-
     logger.info(`Resume parsed from ${originalname}: ${summary.length} chars`);
     return res.json({ success: true, data: { summary } });
   } catch (err) {
     logger.error('generateSummary error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to parse resume. Please try a different file.' });
+    return res.status(500).json({ success: false, message: 'Failed to parse resume.' });
   }
 };

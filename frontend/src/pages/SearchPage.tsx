@@ -77,9 +77,38 @@ export default function SearchPage({ profile, onChange, onJobSaved }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 items-start">
+    <div className="max-w-[1540px] mx-auto space-y-6">
+      <div className="rounded-[32px] border border-white/10 bg-white/[0.035] p-5 sm:p-7 shadow-[0_24px_90px_rgba(0,0,0,0.24)]">
+        <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+          <div className="max-w-3xl">
+            <p className="section-heading mb-3">Talent Matching Workspace</p>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white">
+              Discover, tailor, and track roles from one focused cockpit.
+            </h1>
+            <p className="text-base text-dim mt-4 leading-7">
+              Build a candidate signal on the left, review ranked opportunities in the workbench, and generate outreach without breaking flow.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3 min-w-full xl:min-w-[390px]">
+            <div className="rounded-2xl border border-white/10 bg-ink/40 p-4">
+              <p className="text-xs text-muted font-semibold">Results</p>
+              <p className="text-2xl font-bold text-white mt-1">{allJobs.length}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-ink/40 p-4">
+              <p className="text-xs text-muted font-semibold">Skills</p>
+              <p className="text-2xl font-bold text-accent mt-1">{profile.skills.length}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-ink/40 p-4">
+              <p className="text-xs text-muted font-semibold">Resume</p>
+              <p className="text-2xl font-bold text-green mt-1">{profile.resumeText ? 'On' : 'Off'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div className="grid grid-cols-1 xl:grid-cols-[390px_minmax(0,1fr)] gap-6 lg:gap-8 items-start">
       {/* Left: Profile Form */}
-      <div className="lg:sticky lg:top-20">
+      <div className="xl:sticky xl:top-24">
         <ProfileForm
           profile={profile}
           onChange={onChange}
@@ -92,38 +121,45 @@ export default function SearchPage({ profile, onChange, onJobSaved }: Props) {
       </div>
 
       {/* Right: Results */}
-      <div className="space-y-4 min-h-[60vh]">
+      <div className="rounded-[28px] border border-white/10 bg-[#0d1320]/75 shadow-[0_24px_80px_rgba(0,0,0,0.22)] min-h-[64vh] overflow-hidden">
+        <div className="flex items-center justify-between gap-4 border-b border-white/10 px-5 sm:px-6 py-4 bg-white/[0.025]">
+          <div>
+            <p className="text-sm font-bold text-white">Opportunity workbench</p>
+            <p className="text-xs text-muted mt-1">{hasResults ? `${allJobs.length} roles ready for review` : 'Run a search to populate this board'}</p>
+          </div>
+          <SourceBadge />
+        </div>
+        <div className="p-4 sm:p-6 space-y-5">
         {/* Error */}
         {searchError && (
-          <div className="card p-4 flex items-center gap-3 border-red/20 bg-red/5 animate-fade-in">
+          <div className="card p-5 flex items-center gap-4 border-red/30 bg-red/10 animate-fade-in">
             <WifiOff className="w-5 h-5 text-red shrink-0" />
             <div>
-              <p className="text-sm font-medium text-red">Search failed</p>
-              <p className="text-xs text-muted mt-0.5">{searchError}</p>
+              <p className="text-sm font-semibold text-red">Search failed</p>
+              <p className="text-xs text-red/70 mt-0.5">{searchError}</p>
             </div>
           </div>
         )}
 
         {/* Results header */}
         {hasResults && (
-          <div className="flex items-center justify-between animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between animate-fade-in gap-4 border-b border-white/10 pb-4">
             <div>
-              <h2 className="text-base font-semibold text-white">
+              <h2 className="text-2xl font-bold tracking-tight text-white">
                 {lastMode === 'primary' ? 'Best Matches for You' : 'Jobs Based on Your Skills'}
               </h2>
-              <p className="text-xs text-muted mt-0.5">
+              <p className="text-sm text-muted mt-1">
                 {allJobs.length} job{allJobs.length !== 1 ? 's' : ''} found
               </p>
             </div>
-            <SourceBadge />
           </div>
         )}
 
         {/* Primary results */}
         {primaryJobs.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {secondaryJobs.length > 0 && (
-              <p className="section-heading">Best matches (role + experience)</p>
+              <p className="section-heading text-xs font-bold text-muted uppercase tracking-widest mt-6">Best matches (role + experience)</p>
             )}
             {primaryJobs.map(job => (
               <JobCard
@@ -139,9 +175,9 @@ export default function SearchPage({ profile, onChange, onJobSaved }: Props) {
 
         {/* Secondary results */}
         {secondaryJobs.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {primaryJobs.length > 0 && (
-              <p className="section-heading mt-2">Skill matches</p>
+              <p className="section-heading text-xs font-bold text-muted uppercase tracking-widest mt-6">Skill matches</p>
             )}
             {secondaryJobs.map(job => (
               <JobCard
@@ -157,14 +193,14 @@ export default function SearchPage({ profile, onChange, onJobSaved }: Props) {
 
         {/* Empty state */}
         {!hasResults && !isSearching && !searchError && (
-          <div className="flex flex-col items-center justify-center py-24 gap-4 animate-fade-in">
-            <div className="w-16 h-16 rounded-2xl bg-slate border border-border flex items-center justify-center">
-              <Briefcase className="w-7 h-7 text-muted" />
+          <div className="card flex flex-col items-center justify-center py-24 sm:py-32 gap-5 animate-fade-in text-center">
+            <div className="w-20 h-20 rounded-3xl bg-white/[0.045] border border-white/10 flex items-center justify-center shadow-inner shadow-black/20">
+              <Briefcase className="w-8 h-8 text-accent" />
             </div>
-            <div className="text-center">
-              <p className="text-white font-medium">No results yet</p>
-              <p className="text-sm text-muted mt-1 max-w-xs">
-                Fill in your profile on the left and click <span className="text-accent">Find Jobs by Role</span> or <span className="text-accent">Find Jobs by Skills</span> to get started.
+            <div>
+              <p className="text-white font-bold text-xl">No results yet</p>
+              <p className="text-sm text-muted mt-3 max-w-md leading-relaxed">
+                Fill in your profile on the left and click <span className="text-accent font-semibold">Find Jobs by Role</span> or <span className="text-accent font-semibold">Find Jobs by Skills</span> to get started.
               </p>
             </div>
           </div>
@@ -172,27 +208,29 @@ export default function SearchPage({ profile, onChange, onJobSaved }: Props) {
 
         {/* Loading skeleton */}
         {isSearching && (
-          <div className="space-y-3 animate-fade-in">
+          <div className="space-y-4 animate-fade-in">
             {[1, 2, 3].map(i => (
-              <div key={i} className="card p-5 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-slate rounded-lg w-2/3 animate-pulse-soft" />
-                    <div className="h-3 bg-slate rounded-lg w-1/3 animate-pulse-soft" />
+              <div key={i} className="card p-7 space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="space-y-2.5 flex-1">
+                    <div className="h-6 bg-white/10 rounded-xl w-2/3 animate-pulse-soft" />
+                    <div className="h-3 bg-white/10 rounded-xl w-1/3 animate-pulse-soft" />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div className="h-6 bg-slate rounded-lg w-24 animate-pulse-soft" />
-                  <div className="h-6 bg-slate rounded-lg w-20 animate-pulse-soft" />
-                  <div className="h-6 bg-slate rounded-lg w-28 animate-pulse-soft" />
+                  <div className="h-7 bg-white/10 rounded-full w-24 animate-pulse-soft" />
+                  <div className="h-7 bg-white/10 rounded-full w-20 animate-pulse-soft" />
+                  <div className="h-7 bg-white/10 rounded-full w-28 animate-pulse-soft" />
                 </div>
-                <div className="h-3 bg-slate rounded-lg w-full animate-pulse-soft" />
-                <div className="h-3 bg-slate rounded-lg w-4/5 animate-pulse-soft" />
+                <div className="h-3 bg-white/10 rounded-xl w-full animate-pulse-soft" />
+                <div className="h-3 bg-white/10 rounded-xl w-4/5 animate-pulse-soft" />
               </div>
             ))}
           </div>
         )}
+        </div>
       </div>
+    </div>
     </div>
   )
 }
